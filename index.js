@@ -8,7 +8,6 @@ const OP_CODES = { PUSH1: '60', SSTORE: '55' }
 
 // signer
 const senderWallet = Wallet.generate()
-const senderWallet2 = Wallet.generate()
 
 // vms
 const vm1 = new VM()
@@ -28,11 +27,10 @@ const vm2 = new VM()
 	const contractCode = await vm1.stateManager.getContractCode(result.createdAddress)
 	await vm2.stateManager.putContractCode(result.createdAddress, contractCode)
 	const contractStorage = await vm1.stateManager.dumpStorage(result.createdAddress)
-	for (const [k, v] of Object.entries(contractStorage)) {
-		const key = new Uint8Array(Buffer.from(k.substring(2), 'hex'))
-		const value = new Uint8Array(Buffer.from(v.substring(2), 'hex'))
-		await vm2.stateManager.putContractStorage(result.createdAddress, key, value) // throws error
-	}
+	const [[k, v]] = Object.entries(contractStorage)
+	const key = new Uint8Array(Buffer.from(k.substring(2), 'hex'))
+	const value = new Uint8Array(Buffer.from(v.substring(2), 'hex'))
+	await vm2.stateManager.putContractStorage(result.createdAddress, key, value) // throws error
 	await vm1.stateManager.clearContractStorage(result.createdAddress)
 	
 	// debug contracts
