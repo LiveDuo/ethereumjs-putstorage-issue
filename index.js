@@ -21,16 +21,22 @@ const vm2 = new VM()
 	const signedTx = unsignedTx.sign(senderWallet.getPrivateKey())
 	const result = await vm1.runTx({ tx: signedTx, skipBalance: true })
 	
-	// reassign contract 1 to vm2
+	// assign account to vm2
 	const account = await vm1.stateManager.getAccount(result.createdAddress)
 	await vm2.stateManager.putAccount(result.createdAddress, account)
+
+	// assign code to vm2
 	const contractCode = await vm1.stateManager.getContractCode(result.createdAddress)
 	await vm2.stateManager.putContractCode(result.createdAddress, contractCode)
+
+	// assign storage to vm2
 	const contractStorage = await vm1.stateManager.dumpStorage(result.createdAddress)
 	const [[k, v]] = Object.entries(contractStorage)
 	const key = new Uint8Array(Buffer.from(k.substring(2), 'hex'))
 	const value = new Uint8Array(Buffer.from(v.substring(2), 'hex'))
 	await vm2.stateManager.putContractStorage(result.createdAddress, key, value) // throws error
+
+	// remove from vm1
 	await vm1.stateManager.clearContractStorage(result.createdAddress)
 	
 	// debug contracts
