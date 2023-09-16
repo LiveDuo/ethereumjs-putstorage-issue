@@ -1,6 +1,7 @@
 const { VM } = require('@ethereumjs/vm')
 const { Wallet } = require('@ethereumjs/wallet')
 const { TransactionFactory } = require('@ethereumjs/tx')
+const { Account } = require('@ethereumjs/util')
 
 // constants
 const GAS_PRICE = '0x10', GAS_LIMIT = '0x20000'
@@ -22,7 +23,7 @@ const vm2 = new VM()
 	const result = await vm1.runTx({ tx: signedTx, skipBalance: true })
 	
 	// assign account to vm2
-	const account = await vm1.stateManager.getAccount(result.createdAddress)
+	const account = await vm1.stateManager.getAccount(result.createdAddress).then((a) => new Account(BigInt(a.nonce), BigInt(a.balance)))
 	await vm2.stateManager.putAccount(result.createdAddress, account)
 
 	// assign code to vm2
