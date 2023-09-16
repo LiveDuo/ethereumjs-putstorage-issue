@@ -16,17 +16,11 @@ const vm2 = new VM()
 
 ; (async () => {
 	
-	// deploy contract 1
+	// deploy contract
 	const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
 	const unsignedTx = TransactionFactory.fromTxData({ gasPrice: GAS_PRICE, gasLimit: GAS_LIMIT, data: '0x' + code.join(''), nonce: 0 })
 	const signedTx = unsignedTx.sign(senderWallet.getPrivateKey())
 	const result = await vm1.runTx({ tx: signedTx, skipBalance: true })
-	
-	// deploy contract 2
-	const code2 = [OP_CODES.PUSH1, '04', OP_CODES.PUSH1, '05', OP_CODES.SSTORE]
-	const unsignedTx2 = TransactionFactory.fromTxData({ gasPrice: GAS_PRICE, gasLimit: GAS_LIMIT, data: '0x' + code2.join(''), nonce: 0 })
-	const signedTx2 = unsignedTx2.sign(senderWallet2.getPrivateKey())
-	const result2 = await vm2.runTx({ tx: signedTx2, skipBalance: true })
 	
 	// reassign contract 1 to vm2
 	const account = await vm1.stateManager.getAccount(result.createdAddress)
@@ -43,9 +37,7 @@ const vm2 = new VM()
 	
 	// debug contracts
 	const storage = await vm2.stateManager.dumpStorage(result.createdAddress)
-	const storage2 = await vm2.stateManager.dumpStorage(result2.createdAddress)
 	console.log('Address', result.createdAddress.toString(), '\n', storage)
-	console.log('Address', result2.createdAddress.toString(), '\n', storage2)
 
 })()
 
